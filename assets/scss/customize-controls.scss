@@ -1,0 +1,23 @@
+////
+/// Customize Controls stylesheet.
+///
+/// This stylesheet imports all the styles needed for the customize controls panel.
+////
+
+
+/* setup preview container styles */
+.wp-full-overlay-main {
+    margin: auto 0!important;
+    max-height: 100%;
+    max-width: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@media (max-width: 1024px){
+    #customize-controls .wp-full-overlay-footer .devices{display: block;}
+}
+
+.wp-full-overlay-footer .devices button:before{
+    padding: 4px 6px;
+}
