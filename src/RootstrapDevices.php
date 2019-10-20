@@ -23,7 +23,7 @@ use function Rootstrap\vendor_path;
  * @since  1.0.0
  * @access public
  */
-class RootstrapDevices extends Bootable {
+class RootstrapDevices implements Bootable {
 
     /**
      * Store instance
