@@ -14,7 +14,7 @@
 
 namespace Rootstrap\Devices;
 
-use Hybrid\Contracts\Collection;
+use Hybrid\Tools\Collection;
 
 /**
  * Device collection class.
