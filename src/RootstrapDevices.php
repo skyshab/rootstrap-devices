@@ -26,6 +26,11 @@ use function Rootstrap\vendor_path;
 class RootstrapDevices extends Bootable {
 
     /**
+     * Store instance
+     */
+    private static $instance = null;
+
+    /**
      * Stores Devices object.
      *
      * @since 1.0.0
@@ -40,6 +45,21 @@ class RootstrapDevices extends Bootable {
      * @var string
      */
     private $resources_path;
+
+    /**
+     * Get instance.
+     *
+     * Instantiate new instance if one has not already been created.
+     *
+     * @since 1.0.0
+     * @return object
+     */
+    public static function instance(){
+        if(self::$instance == null) {
+            self::$instance = new RootstrapDevices();
+        }
+        return self::$instance;
+    }
 
     /**
      * Load resources.
