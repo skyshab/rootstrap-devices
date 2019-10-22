@@ -19,9 +19,7 @@
 		"psr-4" : {
 			"Rootstrap\\Devices\\" : "src/"
 		},
-		"files" : [
-			"src/functions.php"
-		]
+		"files" : []
 	},
 	"require" : {}
 }

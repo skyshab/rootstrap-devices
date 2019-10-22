@@ -23,12 +23,7 @@ use function Rootstrap\vendor_path;
  * @since  1.0.0
  * @access public
  */
-class RootstrapDevices implements Bootable {
-
-    /**
-     * Store instance
-     */
-    private static $instance = null;
+class Manager implements Bootable {
 
     /**
      * Stores Devices object.
@@ -47,18 +42,59 @@ class RootstrapDevices implements Bootable {
     private $resources_path;
 
     /**
-     * Get instance.
-     *
-     * Instantiate new instance if one has not already been created.
+     * Stores default devices array
      *
      * @since 1.0.0
-     * @return object
+     * @var array
      */
-    public static function instance(){
-        if(self::$instance == null) {
-            self::$instance = new RootstrapDevices();
+    private $defaults = [
+        'mobile' => [
+            'min' => '',
+            'max' => '767px',
+            'icon' => '"\\f470"',
+            'preview_width' => '375px',
+            'preview_height' => '677px'
+        ],
+        'tablet' => [
+            'min' => '768px',
+            'max' => '1024px',
+            'icon' => '"\\f471"',
+            'preview_width' => '768px',
+            'preview_height' => '100%'
+        ],
+        'desktop' => [
+            'min' => '1025px',
+            'max' => '',
+            'icon' => '"\\f472"',
+            'preview_width' => '100%',
+            'preview_height' => '100%'
+        ]
+    ];
+
+    /**
+     * Store default vendor path on instantiation.
+     *
+     * @since 1.0.0
+     * @param object $vendor_path
+     * @return void
+     */
+    public function __construct($config = false) {
+        // If no config passed in, use defaults
+        $config = ($config) ? $config : $this->defaults;
+
+        // Create devices object
+        $devices = new Devices;
+
+        // Add each device from config
+        foreach($config as $device => $settings) {
+            $devices->add($device, $settings);
         }
-        return self::$instance;
+
+        // Store devices object
+        $this->devices = $devices->all();
+
+        // Store resources path
+        $this->resources_path = vendor_path() . '/rootstrap-devices/dist';
     }
 
     /**
@@ -68,56 +104,14 @@ class RootstrapDevices implements Bootable {
      * @return object
      */
     public function boot() {
-        // Store resources path
-        $this->resources_path = vendor_path() . '/rootstrap-devices/dist';
-        // Initiate Core Modules
-        add_action( 'rootstrap/loaded',                     [ $this, 'init' ] );
         // Set Customizer Devices
-        add_filter( 'customize_previewable_devices',        [ $this, 'customize_previewable_devices' ] );
+        add_filter( 'customize_previewable_devices',        [ $this, 'previewableDevices' ] );
         // Add Customizer Screen Styles
-        add_action( 'customize_controls_print_styles',      [ $this, 'customize_controls_print_styles' ] );
+        add_action( 'customize_controls_print_styles',      [ $this, 'controlStyles' ] );
         // Enqueue controls scripts
-        add_action( 'customize_controls_enqueue_scripts',   [ $this, 'customize_resources' ] );
+        add_action( 'customize_controls_enqueue_scripts',   [ $this, 'customizeResources' ] );
     }
 
-    /**
-     * Initiate Core Modules.
-     *
-     * @since 1.1.0
-     * @return object
-     */
-    public function init() {
-        // Create devices object
-        $devices = new Devices;
-        // Define mobile device
-        $devices->add( 'mobile', [
-            'min' => '',
-            'max' => '767px',
-            'icon' => '"\\f470"',
-            'preview_width' => '375px',
-            'preview_height' => '677px'
-        ]);
-        // Define tablet device
-        $devices->add( 'tablet', [
-            'min' => '768px',
-            'max' => '1024px',
-            'icon' => '"\\f471"',
-            'preview_width' => '768px',
-            'preview_height' => '100%'
-        ]);
-        // Define desktop device
-        $devices->add( 'desktop', [
-            'min' => '1025px',
-            'max' => '',
-            'icon' => '"\\f472"',
-            'preview_width' => '100%',
-            'preview_height' => '100%'
-        ]);
-        // Action hook for plugins and child themes to add or remove devices
-        do_action( 'rootstrap/register/devices', $devices );
-        // Store devices object
-        $this->devices = $devices;
-    }
 
     /**
      * Enqueue scripts and styles.
@@ -126,22 +120,10 @@ class RootstrapDevices implements Bootable {
      *
      * @since 1.0.0
      */
-    public function customize_resources() {
+    public function customizeResources() {
         wp_enqueue_script( 'rootstrap-customize-controls', $this->resources_path . '/js/customize-controls.js', ['customize-controls'], null, true );
-        wp_localize_script( 'rootstrap-customize-controls', 'rootstrapData', $this->js_data() );
+        wp_localize_script( 'rootstrap-customize-controls', 'rootstrapData.devices', $this->getDevicesData() );
         wp_enqueue_style( 'rootstrap-customize-controls', $this->resources_path . '/css/customize-controls.css' );
-    }
-
-    /**
-     * Get data to make available to JS.
-     *
-     * @since  1.0.0
-     * @access public
-     * @return array  returns array of js data
-     */
-    public function js_data() {
-        // Filter to modify the devices data
-        return apply_filters( 'rootstrap/resources/js-data', ['devices' => get_devices_data()] );
     }
 
     /**
@@ -154,24 +136,29 @@ class RootstrapDevices implements Bootable {
      * @param array $devices - array of registered devices
      * @return array
      */
-    public function customize_previewable_devices( $defaults ) {
+    public function previewableDevices( $defaults ) {
         // Get all of the devices
-        $devices = get_devices();
+        $devices = $this->getDevices();
+
         // If no custom devices, use wp defaults
         if( !$devices ) return $defaults;
+
         // Create empty array to store devices
-        $device_array = [];
+        $deviceArray = [];
+
         // Generate a label for each device button
         foreach ($devices as $name => $device) {
             // this should have a translation
-            $device_array[$name]['label'] =  esc_html( sprintf('Enter %s preview mode', $name ) );
+            $deviceArray[$name]['label'] =  esc_html( sprintf('Enter %s preview mode', $name ) );
+
             // If no max, assume this is 'desktop' or equivalent, set as default
             if( !$device->max() ) {
-                $device_array[$name]['default'] = true;
+                $deviceArray[$name]['default'] = true;
             }
         }
+
         // Return our custom device array
-        return $device_array;
+        return $deviceArray;
     }
 
     /**
@@ -180,9 +167,9 @@ class RootstrapDevices implements Bootable {
      * @since 1.0.0
      * @return string
      */
-    public function customize_controls_print_styles() {
+    public function controlStyles() {
         $styles = "<style>";
-        foreach ( get_devices() as $name => $device ) {
+        foreach ( $this->getDevices() as $name => $device ) {
             // add icon to preview button
             $styles .= sprintf( 'button.preview-%s:before{content: %s;}', $name, $device->icon() );
             // set customize preview screen max width
@@ -200,4 +187,21 @@ class RootstrapDevices implements Bootable {
     public function getDevices() {
         return $this->devices;
     }
+
+    /**
+     * Get Devices Data
+     *
+     * @since  1.0.0
+     * @access public
+     * @return array
+     */
+    function getDevicesData() {
+        $devicesArray = [];
+        foreach( $this->getDevices() as $name => $device ) {
+            $devicesArray[$name]['min'] = $device->min();
+            $devicesArray[$name]['max'] = $device->max();
+        }
+        return $devicesArray;
+    }
+
 }
