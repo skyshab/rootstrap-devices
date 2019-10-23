@@ -122,7 +122,7 @@ class Manager implements Bootable {
      */
     public function customizeResources() {
         wp_enqueue_script( 'rootstrap-customize-controls', $this->resources_path . '/js/customize-controls.js', ['customize-controls'], null, true );
-        wp_localize_script( 'rootstrap-customize-controls', 'rootstrapData.devices', $this->getDevicesData() );
+        wp_localize_script( 'rootstrap-customize-controls', 'rootstrapDataDevices', $this->getDevicesData() );
         wp_enqueue_style( 'rootstrap-customize-controls', $this->resources_path . '/css/customize-controls.css' );
     }
 

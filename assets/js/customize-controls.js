@@ -20,7 +20,7 @@ class RootstrapDevices {
         if( ! this.api ) return false;
 
         // define registered devices
-        this.devices = rootstrapData.devices;
+        this.devices = rootstrapDataDevices;
     }
 
 
