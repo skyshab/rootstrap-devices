@@ -91,7 +91,7 @@ class Manager implements Bootable {
         }
 
         // Store devices object
-        $this->devices = $devices->all();
+        $this->devices = $devices;
 
         // Store resources path
         $this->resources_path = vendor_path() . '/rootstrap-devices/dist';
@@ -138,7 +138,7 @@ class Manager implements Bootable {
      */
     public function previewableDevices( $defaults ) {
         // Get all of the devices
-        $devices = $this->getDevices();
+        $devices = $this->getDevicesArray();
 
         // If no custom devices, use wp defaults
         if( !$devices ) return $defaults;
@@ -169,7 +169,7 @@ class Manager implements Bootable {
      */
     public function controlStyles() {
         $styles = "<style>";
-        foreach ( $this->getDevices() as $name => $device ) {
+        foreach ( $this->getDevicesArray() as $name => $device ) {
             // add icon to preview button
             $styles .= sprintf( 'button.preview-%s:before{content: %s;}', $name, $device->icon() );
             // set customize preview screen max width
@@ -178,6 +178,7 @@ class Manager implements Bootable {
         $styles .= "</style>";
         echo $styles;
     }
+
     /**
      * Get Devices Object.
      *
@@ -189,6 +190,17 @@ class Manager implements Bootable {
     }
 
     /**
+     * Get Devices Array.
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function getDevicesArray() {
+        $devices = $this->devices;
+        return $devices->all();
+    }
+
+    /**
      * Get Devices Data
      *
      * @since  1.0.0
@@ -197,7 +209,7 @@ class Manager implements Bootable {
      */
     function getDevicesData() {
         $devicesArray = [];
-        foreach( $this->getDevices() as $name => $device ) {
+        foreach( $this->getDevicesArray() as $name => $device ) {
             $devicesArray[$name]['min'] = $device->min();
             $devicesArray[$name]['max'] = $device->max();
         }
