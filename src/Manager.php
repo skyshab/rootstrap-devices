@@ -94,7 +94,7 @@ class Manager implements Bootable {
         $this->devices = $devices;
 
         // Store resources path
-        $this->resources_path = vendor_path() . '/rootstrap-devices/dist';
+        $this->resources_path = vendor_path() . '/skyshab/rootstrap-devices/dist';
     }
 
     /**
