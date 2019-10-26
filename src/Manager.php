@@ -1,14 +1,14 @@
 <?php
 /**
- * Rootstrap class.
+ * Rootstrap Devices
  *
- * This class handles the Rootstrap config data and sets up
- * the individual modules that make up Rootstrap.
+ * This class handles devices used in the customizer preview
+ * and responsive breakpoints for theme styles.
  *
- * @package   Rootstrap
+ * @package   Rootstrap/Devices
  * @author    Sky Shabatura
  * @copyright Copyright (c) 2019, Sky Shabatura
- * @link      https://github.com/skyshab/rootstrap
+ * @link      https://github.com/skyshab/rootstrap-devices
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
@@ -78,12 +78,12 @@ class Manager implements Bootable {
      * @param object $vendor_path
      * @return void
      */
-    public function __construct($config = false) {
-        // If no config passed in, use defaults
-        $config = ($config) ? $config : $this->defaults;
+    public function __construct($devices, $config = false ) {
 
-        // Create devices object
-        $devices = new Devices;
+        // If no config passed in, use defaults
+        if( ! $config ) {
+            $config = $this->defaults;
+        }
 
         // Add each device from config
         foreach($config as $device => $settings) {
@@ -92,22 +92,25 @@ class Manager implements Bootable {
 
         // Store devices object
         $this->devices = $devices;
-
-        // Store resources path
-        $this->resources_path = vendor_path() . '/skyshab/rootstrap-devices/dist';
     }
 
     /**
-     * Load resources.
+     * Boot class functionality.
      *
      * @since 1.0.0
      * @return object
      */
     public function boot() {
+
+        // Store resources path
+        $this->resources_path = vendor_path() . '/skyshab/rootstrap-devices/dist';
+
         // Set Customizer Devices
         add_filter( 'customize_previewable_devices',        [ $this, 'previewableDevices' ] );
+
         // Add Customizer Screen Styles
         add_action( 'customize_controls_print_styles',      [ $this, 'controlStyles' ] );
+
         // Enqueue controls scripts
         add_action( 'customize_controls_enqueue_scripts',   [ $this, 'customizeResources' ] );
     }
