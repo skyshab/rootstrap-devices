@@ -34,14 +34,6 @@ class Manager implements Bootable {
     private $devices;
 
     /**
-     * Stores resources path.
-     *
-     * @since 1.0.0
-     * @var string
-     */
-    private $resources_path;
-
-    /**
      * Stores default devices array
      *
      * @since 1.0.0
@@ -102,9 +94,6 @@ class Manager implements Bootable {
      */
     public function boot() {
 
-        // Store resources path
-        $this->resources_path = vendor_path() . '/skyshab/rootstrap-devices/dist';
-
         // Set Customizer Devices
         add_filter( 'customize_previewable_devices',        [ $this, 'previewableDevices' ] );
 
@@ -124,9 +113,28 @@ class Manager implements Bootable {
      * @since 1.0.0
      */
     public function customizeResources() {
-        wp_enqueue_script( 'rootstrap-customize-controls', $this->resources_path . '/js/customize-controls.js', ['customize-controls'], null, true );
+
+        // Define resources path
+        $resources_path = vendor_path() . '/skyshab/rootstrap-devices/dist';
+
+        // Enqueue module script
+        wp_enqueue_script( 'rootstrap-customize-controls', $resources_path . '/js/customize-controls.js', ['customize-controls'], null, true );
+
+        // Make devices data available for scripts
         wp_localize_script( 'rootstrap-customize-controls', 'rootstrapDataDevices', $this->getDevicesData() );
-        wp_enqueue_style( 'rootstrap-customize-controls', $this->resources_path . '/css/customize-controls.css' );
+
+        // Enqueue module styles
+        wp_enqueue_style( 'rootstrap-customize-controls', $resources_path . '/css/customize-controls.css' );
+    }
+
+    /**
+     * Get Devices Collection.
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function collection() {
+        return $this->devices;
     }
 
     /**
@@ -140,8 +148,9 @@ class Manager implements Bootable {
      * @return array
      */
     public function previewableDevices( $defaults ) {
-        // Get all of the devices
-        $devices = $this->getDevicesArray();
+
+        // Get Devices array
+        $devices = $this->collection()->all();
 
         // If no custom devices, use wp defaults
         if( !$devices ) return $defaults;
@@ -172,7 +181,7 @@ class Manager implements Bootable {
      */
     public function controlStyles() {
         $styles = "<style>";
-        foreach ( $this->getDevicesArray() as $name => $device ) {
+        foreach ( $this->collection()->all() as $name => $device ) {
             // add icon to preview button
             $styles .= sprintf( 'button.preview-%s:before{content: %s;}', $name, $device->icon() );
             // set customize preview screen max width
@@ -180,27 +189,6 @@ class Manager implements Bootable {
         }
         $styles .= "</style>";
         echo $styles;
-    }
-
-    /**
-     * Get Devices Object.
-     *
-     * @since 1.0.0
-     * @return void
-     */
-    public function getDevices() {
-        return $this->devices;
-    }
-
-    /**
-     * Get Devices Array.
-     *
-     * @since 1.0.0
-     * @return void
-     */
-    public function getDevicesArray() {
-        $devices = $this->devices;
-        return $devices->all();
     }
 
     /**
@@ -212,11 +200,10 @@ class Manager implements Bootable {
      */
     function getDevicesData() {
         $devicesArray = [];
-        foreach( $this->getDevicesArray() as $name => $device ) {
+        foreach( $this->collection()->all() as $name => $device ) {
             $devicesArray[$name]['min'] = $device->min();
             $devicesArray[$name]['max'] = $device->max();
         }
         return $devicesArray;
     }
-
 }
