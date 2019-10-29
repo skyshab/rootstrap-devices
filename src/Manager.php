@@ -64,16 +64,17 @@ class Manager implements Bootable {
     ];
 
     /**
-     * Store default vendor path on instantiation.
+     * Initiate Devices Manager.
      *
      * @since 1.0.0
-     * @param object $vendor_path
+     * @param object $devices - a Collection of Devices
+     * @param array  $config - an array of devices data
      * @return void
      */
-    public function __construct($devices, $config = false ) {
+    public function __construct( Devices $devices, array $config = [] ) {
 
         // If no config passed in, use defaults
-        if( ! $config ) {
+        if( empty($config) ) {
             $config = $this->defaults;
         }
 
@@ -82,7 +83,7 @@ class Manager implements Bootable {
             $devices->add($device, $settings);
         }
 
-        // Store devices object
+        // Store Devices Collection
         $this->devices = $devices;
     }
 

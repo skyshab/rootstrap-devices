@@ -1,8 +1,8 @@
 {
 	"name"        : "skyshab/rootstrap-devices",
-	"description" : "Rootstrap is a collection of utilities for managing WordPress Customizer controls, settings, responsive breakpoints and styles.",
+	"description" : "Utility for managing the devices and breakpoints in the customizer and customize preview.",
 	"keywords"    : [ "wordpress" ],
-	"homepage"    : "https://github.com/skyshab/rootstrap",
+	"homepage"    : "https://github.com/skyshab/rootstrap-devices",
 	"license"     : "GPL-2.0-or-later",
 	"authors"     : [
 		{
@@ -13,7 +13,7 @@
 		}
 	],
 	"support" : {
-		"issues" : "https://github.com/skyshab/rootstrap/issues"
+		"issues" : "https://github.com/skyshab/rootstrap-devices/issues"
 	},
 	"autoload" : {
 		"psr-4" : {
@@ -21,5 +21,7 @@
 		},
 		"files" : []
 	},
-	"require" : {}
+	"require" : {
+        "skyshab/rootstrap" : ">=1.0"
+    }
 }
