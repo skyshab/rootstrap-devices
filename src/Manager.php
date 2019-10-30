@@ -67,7 +67,6 @@ class Manager implements Bootable {
      * Initiate Devices Manager.
      *
      * @since 1.0.0
-     * @param object $devices - a Collection of Devices
      * @param array  $config - an array of devices data
      * @return void
      */
@@ -78,6 +77,7 @@ class Manager implements Bootable {
             $config = $this->defaults;
         }
 
+        // Create new Devices Collection
         $devices = new Devices();
 
         // Add each device from config
