@@ -71,12 +71,14 @@ class Manager implements Bootable {
      * @param array  $config - an array of devices data
      * @return void
      */
-    public function __construct( Devices $devices, array $config = [] ) {
+    public function __construct( array $config = [] ) {
 
         // If no config passed in, use defaults
         if( empty($config) ) {
             $config = $this->defaults;
         }
+
+        $devices = new Devices();
 
         // Add each device from config
         foreach($config as $device => $settings) {
