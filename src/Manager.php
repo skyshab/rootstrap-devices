@@ -15,7 +15,6 @@
 namespace Rootstrap\Devices;
 
 use Hybrid\Contracts\Bootable;
-use function Rootstrap\vendor_path;
 
 /**
  * Creates a new Rootstrap object.
@@ -98,36 +97,10 @@ class Manager implements Bootable {
     public function boot() {
 
         // Set Customizer Devices
-        add_filter( 'customize_previewable_devices',        [ $this, 'previewableDevices' ] );
+        add_filter( 'customize_previewable_devices',    [ $this, 'previewableDevices' ] );
 
         // Add Customizer Screen Styles
-        add_action( 'customize_controls_print_styles',      [ $this, 'controlStyles' ] );
-
-        // Enqueue controls scripts
-        add_action( 'customize_controls_enqueue_scripts',   [ $this, 'customizeResources' ] );
-    }
-
-
-    /**
-     * Enqueue scripts and styles.
-     *
-     *  If filters are applied defining file locations, load scripts and styles.
-     *
-     * @since 1.0.0
-     */
-    public function customizeResources() {
-
-        // Define resources path
-        $resources_path = vendor_path() . '/skyshab/rootstrap-devices/dist';
-
-        // Enqueue module script
-        wp_enqueue_script( 'rootstrap-customize-controls', $resources_path . '/js/customize-controls.js', ['customize-controls'], null, true );
-
-        // Make devices data available for scripts
-        wp_localize_script( 'rootstrap-customize-controls', 'rootstrapDataDevices', $this->getDevicesData() );
-
-        // Enqueue module styles
-        wp_enqueue_style( 'rootstrap-customize-controls', $resources_path . '/css/customize-controls.css' );
+        add_action( 'customize_controls_print_styles',  [ $this, 'controlStyles' ] );
     }
 
     /**
@@ -183,30 +156,26 @@ class Manager implements Bootable {
      * @return string
      */
     public function controlStyles() {
+
+        // open styleblock
         $styles = "<style>";
+        // add styles for each device button
         foreach ( $this->collection()->all() as $name => $device ) {
             // add icon to preview button
             $styles .= sprintf( 'button.preview-%s:before{content: %s;}', $name, $device->icon() );
             // set customize preview screen max width
             $styles .= sprintf( '.preview-%s #customize-preview{width: %s!important; height: %s!important;}', $name, $device->preview_width(), $device->preview_height() );
         }
+        // keep overaly centered
+        $styles .= ".wp-full-overlay-main{margin: auto 0!important;max-height: 100%;max-width: 100%;left: 50%;transform: translateX(-50%);}";
+        // device picker at mobile sizes
+        $styles .= "@media (max-width: 1024px){#customize-controls .wp-full-overlay-footer .devices{display: block;}}";
+        // device buttons
+        $styles .= ".wp-full-overlay-footer .devices button:before{padding: 4px 6px;}";
+        // close styleblock
         $styles .= "</style>";
-        echo $styles;
-    }
 
-    /**
-     * Get Devices Data
-     *
-     * @since  1.0.0
-     * @access public
-     * @return array
-     */
-    function getDevicesData() {
-        $devicesArray = [];
-        foreach( $this->collection()->all() as $name => $device ) {
-            $devicesArray[$name]['min'] = $device->min();
-            $devicesArray[$name]['max'] = $device->max();
-        }
-        return $devicesArray;
+        // print the styles
+        echo $styles;
     }
 }
